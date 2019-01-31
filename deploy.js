@@ -79,6 +79,7 @@ function parseCLIOptions() {
     const pathToCache = config.get("cache") || `${__dirname}/_terraform`;
 
     const contextPrefix = config.get("context-prefix");
+    const vchains = _.map(config.get("vchains") || [], _.parseInt);
 
     return {
         removeNode,
@@ -92,7 +93,8 @@ function parseCLIOptions() {
         regions,
         pathToConfig,
         pathToCache,
-        contextPrefix
+        contextPrefix,
+        vchains
     }
 }
 
@@ -109,7 +111,8 @@ async function deploy(options) {
         regions,
         pathToConfig,
         pathToCache,
-        contextPrefix
+        contextPrefix,
+        vchains
     } = options;
 
     if (regions.length == 0) {
@@ -130,8 +133,12 @@ async function deploy(options) {
     });
 
     if (!_.isEmpty(chainVersion)) {
-        _.each(boyarConfig.chains, (chain) => {
-            chain.DockerConfig.Tag = chainVersion
+        _.map(boyarConfig.chains, (chain) => {
+            const shouldBeUpdated = _.isEmpty(vchains) || _.includes(vchains, chain.Id);
+
+            if (shouldBeUpdated) {
+                chain.DockerConfig.Tag = chainVersion;
+            }
         });
 
         console.log(JSON.stringify(boyarConfig, 2, 2));
