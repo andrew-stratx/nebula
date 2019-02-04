@@ -79,7 +79,6 @@ function parseCLIOptions() {
     const pathToCache = config.get("cache") || `${__dirname}/_terraform`;
 
     const contextPrefix = config.get("context-prefix");
-    const vchains = _.map(config.get("vchains") || [], _.parseInt);
 
     return {
         removeNode,
@@ -93,8 +92,7 @@ function parseCLIOptions() {
         regions,
         pathToConfig,
         pathToCache,
-        contextPrefix,
-        vchains
+        contextPrefix
     }
 }
 
@@ -132,15 +130,20 @@ async function deploy(options) {
         };
     });
 
-    if (!_.isEmpty(chainVersion)) {
+    // Update all chains to a single version
+    if (updateVchains && !_.isEmpty(chainVersion)) {
         _.map(boyarConfig.chains, (chain) => {
-            const shouldBeUpdated = _.isEmpty(vchains) || _.includes(vchains, chain.Id);
-
-            if (shouldBeUpdated) {
-                chain.DockerConfig.Tag = chainVersion;
-            }
+            chain.DockerConfig.Tag = chainVersion;
         });
+        console.log(JSON.stringify(boyarConfig, 2, 2));
+    }
 
+    // Update chains to specific versions
+    if (updateVchains && !_.isEmpty(vchains)) {
+        _.map(vchains, (version, id) => {
+            const chain = _.find(boyarConfig.chains, {Id: _.parseInt(id)});
+            _.set(chain, "DockerConfig.Tag", version);
+        });
         console.log(JSON.stringify(boyarConfig, 2, 2));
     }
 
