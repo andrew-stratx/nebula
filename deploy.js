@@ -1,6 +1,6 @@
 const types = require('./constants/types');
 const { CoreService } = require('./lib/services/core/core');
-const { TerraformService } = require('./lib/services/terraform/terraform');
+const { TerraformService, getBoyarBucketName } = require('./lib/services/terraform/terraform');
 const terraformProdAdapter = require('./lib/adapters/terraform/adapter');
 const { coreAdapter } = require('./lib/adapters/core/adapter');
 const writeFile = require('fs').writeFileSync;
@@ -218,7 +218,7 @@ async function deploy(options) {
             writeFile(tmpPath, JSON.stringify(boyarConfig));
 
             const profile = _.isEmpty(awsProfile) ? "" : `--profile ${awsProfile}`
-            const command = `aws s3 cp --acl public-read ${tmpPath} ${profile} s3://${cloud.bucketPrefix}-${region}/boyar/config.json`;
+            const command = `aws s3 cp --acl public-read ${tmpPath} ${profile} s3://${getBoyarBucketName(spinContext)}/boyar/config.json`;
             console.log(command);
 
             shell.exec(command);
