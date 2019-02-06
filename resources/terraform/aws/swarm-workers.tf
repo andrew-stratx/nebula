@@ -2,6 +2,9 @@ locals {
   worker_user_data = <<TFEOF
 #!/bin/sh
 
+# Disable prompts for any debian commands
+export DEBIAN_FRONTEND=noninteractive
+
 # Mount external volume as docker lib
 
 while true; do

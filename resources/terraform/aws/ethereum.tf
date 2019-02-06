@@ -2,6 +2,9 @@ locals {
   ethereum_user_data = <<TFEOF
 #! /bin/bash
 
+# Disable prompts for any debian commands
+export DEBIAN_FRONTEND=noninteractive
+
 while true; do
   sleep 1
   test -e /dev/xvdh && break
